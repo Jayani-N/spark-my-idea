@@ -12,14 +12,14 @@ interface FormData {
 }
 
 interface ValidationResult {
-  "1_Target_Market": string;
-  "2_Realness_of_the_Problem": number;
-  "3_Existing_Alternatives": string[];
-  "4_Whats_Unique": string;
-  "5_Feasibility_for_a_college_team": string;
-  "6_Potential_Success_Score": number;
-  "7_AI_Verdict": string;
-  "8_One_Actionable_Suggestion": string;
+  "Target Market": string;
+  "Realness of the Problem": number;
+  "Existing Alternatives": string[];
+  "What's Unique?": string;
+  "Feasibility for a college team": string;
+  "Potential Success Score": number;
+  "AI Verdict": string;
+  "One actionable suggestion to improve it": string;
 }
 
 const IdeaValidatorForm = () => {
@@ -136,13 +136,13 @@ const IdeaValidatorForm = () => {
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="p-6 bg-background/50 border-border/30">
                 <h3 className="text-lg font-semibold text-foreground mb-3">Target Market</h3>
-                <p className="text-muted-foreground text-sm">{validationResult["1_Target_Market"]}</p>
+                <p className="text-muted-foreground text-sm">{validationResult["Target Market"]}</p>
               </Card>
 
               <Card className="p-6 bg-background/50 border-border/30">
                 <h3 className="text-lg font-semibold text-foreground mb-3">Problem Reality Score</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-primary">{validationResult["2_Realness_of_the_Problem"]}</span>
+                  <span className="text-2xl font-bold text-primary">{validationResult["Realness of the Problem"]}</span>
                   <span className="text-muted-foreground">/10</span>
                 </div>
               </Card>
@@ -150,7 +150,7 @@ const IdeaValidatorForm = () => {
               <Card className="p-6 bg-background/50 border-border/30">
                 <h3 className="text-lg font-semibold text-foreground mb-3">Success Score</h3>
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-primary">{validationResult["6_Potential_Success_Score"]}</span>
+                  <span className="text-2xl font-bold text-primary">{validationResult["Potential Success Score"]}</span>
                   <span className="text-muted-foreground">/10</span>
                 </div>
               </Card>
@@ -158,35 +158,35 @@ const IdeaValidatorForm = () => {
               <Card className="p-6 bg-background/50 border-border/30">
                 <h3 className="text-lg font-semibold text-foreground mb-3">AI Verdict</h3>
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  validationResult["7_AI_Verdict"] === "Refine" ? "bg-yellow-500/20 text-yellow-600" :
-                  validationResult["7_AI_Verdict"] === "Proceed" ? "bg-green-500/20 text-green-600" :
+                  validationResult["AI Verdict"] === "Refine" ? "bg-yellow-500/20 text-yellow-600" :
+                  validationResult["AI Verdict"] === "Proceed" ? "bg-green-500/20 text-green-600" :
                   "bg-red-500/20 text-red-600"
                 }`}>
-                  {validationResult["7_AI_Verdict"]}
+                  {validationResult["AI Verdict"]}
                 </span>
               </Card>
             </div>
 
             <Card className="p-6 bg-background/50 border-border/30">
               <h3 className="text-lg font-semibold text-foreground mb-3">What Makes It Unique</h3>
-              <p className="text-muted-foreground text-sm">{validationResult["4_Whats_Unique"]}</p>
+              <p className="text-muted-foreground text-sm">{validationResult["What's Unique?"]}</p>
             </Card>
 
             <Card className="p-6 bg-background/50 border-border/30">
               <h3 className="text-lg font-semibold text-foreground mb-3">Feasibility Assessment</h3>
-              <p className="text-muted-foreground text-sm">{validationResult["5_Feasibility_for_a_college_team"]}</p>
+              <p className="text-muted-foreground text-sm">{validationResult["Feasibility for a college team"]}</p>
             </Card>
 
             <Card className="p-6 bg-background/50 border-border/30">
               <h3 className="text-lg font-semibold text-foreground mb-3">Actionable Suggestion</h3>
-              <p className="text-muted-foreground text-sm">{validationResult["8_One_Actionable_Suggestion"]}</p>
+              <p className="text-muted-foreground text-sm">{validationResult["One actionable suggestion to improve it"]}</p>
             </Card>
 
-            {validationResult["3_Existing_Alternatives"] && validationResult["3_Existing_Alternatives"].length > 0 && (
+            {validationResult["Existing Alternatives"] && validationResult["Existing Alternatives"].length > 0 && (
               <Card className="p-6 bg-background/50 border-border/30">
                 <h3 className="text-lg font-semibold text-foreground mb-3">Existing Alternatives</h3>
                 <ul className="space-y-2">
-                  {validationResult["3_Existing_Alternatives"].map((alternative, index) => (
+                  {validationResult["Existing Alternatives"].map((alternative, index) => (
                     <li key={index} className="text-muted-foreground text-sm flex items-start gap-2">
                       <span className="text-primary mt-1">•</span>
                       {alternative}
