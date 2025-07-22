@@ -12,14 +12,14 @@ interface FormData {
 }
 
 interface ValidationResult {
-  "1. Target Market": string;
-  "2. Realness of the Problem": number;
-  "3. Existing Alternatives": string[];
-  "4. What's Unique?": string;
-  "5. Feasibility for a college team": string;
-  "6. Potential Success Score": number;
-  "7. AI Verdict": string;
-  "8. One actionable suggestion to improve it": string;
+  "Target Market": string;
+  "Realness of the Problem": number;
+  "Existing Alternatives": string[];
+  "What's Unique?": string;
+  "Feasibility for a college team": string;
+  "Potential Success Score": number;
+  "AI Verdict": string;
+  "One actionable suggestion to improve it": string;
 }
 
 const IdeaValidatorForm = () => {
@@ -78,9 +78,22 @@ const IdeaValidatorForm = () => {
           try {
             const outputText = data.output.replace(/```json\n|\n```/g, '');
             console.log('Cleaned output text:', outputText);
-            const parsedResult = JSON.parse(outputText);
-            console.log('Parsed result:', parsedResult);
-            setValidationResult(parsedResult);
+            const rawResult = JSON.parse(outputText);
+
+// Remove numeric prefixes from keys
+            const parsedResult: ValidationResult = {
+              "Target Market": rawResult["1. Target Market"],
+              "Realness of the Problem": rawResult["2. Realness of the Problem"],
+              "Existing Alternatives": rawResult["3. Existing Alternatives"],
+              "What's Unique?": rawResult["4. What’s Unique?"],
+              "Feasibility for a college team": rawResult["5. Feasibility for a college team"],
+              "Potential Success Score": rawResult["6. Potential Success Score"],
+              "AI Verdict": rawResult["7. AI Verdict"],
+              "One actionable suggestion to improve it": rawResult["8. One actionable suggestion to improve it"]
+            };
+
+              setValidationResult(parsedResult);
+
           } catch (parseError) {
             console.error('Error parsing output:', parseError);
             toast({
