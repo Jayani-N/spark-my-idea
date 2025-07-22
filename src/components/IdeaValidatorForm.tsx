@@ -11,6 +11,17 @@ interface FormData {
   targetAudience: string;
 }
 
+interface ValidationResult {
+  "1_Target_Market": string;
+  "2_Realness_of_the_Problem": number;
+  "3_Existing_Alternatives": string[];
+  "4_Whats_Unique": string;
+  "5_Feasibility_for_a_college_team": string;
+  "6_Potential_Success_Score": number;
+  "7_AI_Verdict": string;
+  "8_One_Actionable_Suggestion": string;
+}
+
 const IdeaValidatorForm = () => {
   const [formData, setFormData] = useState<FormData>({
     appIdea: "",
@@ -18,7 +29,7 @@ const IdeaValidatorForm = () => {
     targetAudience: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const { toast } = useToast();
 
   const handleInputChange = (field: keyof FormData) => (
@@ -58,10 +69,22 @@ const IdeaValidatorForm = () => {
       });
 
       if (response.ok) {
-        setIsSubmitted(true);
+        const data = await response.json();
+        
+        // Parse the output if it exists
+        if (data.output) {
+          try {
+            const outputText = data.output.replace(/```json\n|\n```/g, '');
+            const parsedResult = JSON.parse(outputText);
+            setValidationResult(parsedResult);
+          } catch (parseError) {
+            console.error('Error parsing output:', parseError);
+          }
+        }
+        
         toast({
           title: "Success!",
-          description: "Your idea has been submitted for validation.",
+          description: "Your idea has been analyzed.",
         });
         
         // Reset form after successful submission
@@ -84,26 +107,87 @@ const IdeaValidatorForm = () => {
     }
   };
 
-  if (isSubmitted) {
+  if (validationResult) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-background/80 flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg p-8 bg-card/50 backdrop-blur-sm border-border/50 shadow-lg">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 mx-auto bg-primary/20 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+        <Card className="w-full max-w-4xl p-8 bg-card/50 backdrop-blur-sm border-border/50 shadow-lg">
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-bold text-foreground">Validation Results</h2>
+              <p className="text-muted-foreground">Here's what we found about your app idea</p>
             </div>
-            <h2 className="text-2xl font-bold text-foreground">Idea Submitted!</h2>
-            <p className="text-muted-foreground">
-              Thank you for sharing your app idea. We'll analyze it and get back to you with valuable insights.
-            </p>
-            <Button 
-              onClick={() => setIsSubmitted(false)} 
-              className="mt-6 bg-primary hover:bg-primary/90"
-            >
-              Submit Another Idea
-            </Button>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card className="p-6 bg-background/50 border-border/30">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Target Market</h3>
+                <p className="text-muted-foreground text-sm">{validationResult["1_Target_Market"]}</p>
+              </Card>
+
+              <Card className="p-6 bg-background/50 border-border/30">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Problem Reality Score</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-primary">{validationResult["2_Realness_of_the_Problem"]}</span>
+                  <span className="text-muted-foreground">/10</span>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-background/50 border-border/30">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Success Score</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-primary">{validationResult["6_Potential_Success_Score"]}</span>
+                  <span className="text-muted-foreground">/10</span>
+                </div>
+              </Card>
+
+              <Card className="p-6 bg-background/50 border-border/30">
+                <h3 className="text-lg font-semibold text-foreground mb-3">AI Verdict</h3>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                  validationResult["7_AI_Verdict"] === "Refine" ? "bg-yellow-500/20 text-yellow-600" :
+                  validationResult["7_AI_Verdict"] === "Proceed" ? "bg-green-500/20 text-green-600" :
+                  "bg-red-500/20 text-red-600"
+                }`}>
+                  {validationResult["7_AI_Verdict"]}
+                </span>
+              </Card>
+            </div>
+
+            <Card className="p-6 bg-background/50 border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-3">What Makes It Unique</h3>
+              <p className="text-muted-foreground text-sm">{validationResult["4_Whats_Unique"]}</p>
+            </Card>
+
+            <Card className="p-6 bg-background/50 border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-3">Feasibility Assessment</h3>
+              <p className="text-muted-foreground text-sm">{validationResult["5_Feasibility_for_a_college_team"]}</p>
+            </Card>
+
+            <Card className="p-6 bg-background/50 border-border/30">
+              <h3 className="text-lg font-semibold text-foreground mb-3">Actionable Suggestion</h3>
+              <p className="text-muted-foreground text-sm">{validationResult["8_One_Actionable_Suggestion"]}</p>
+            </Card>
+
+            {validationResult["3_Existing_Alternatives"] && validationResult["3_Existing_Alternatives"].length > 0 && (
+              <Card className="p-6 bg-background/50 border-border/30">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Existing Alternatives</h3>
+                <ul className="space-y-2">
+                  {validationResult["3_Existing_Alternatives"].map((alternative, index) => (
+                    <li key={index} className="text-muted-foreground text-sm flex items-start gap-2">
+                      <span className="text-primary mt-1">•</span>
+                      {alternative}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
+
+            <div className="text-center">
+              <Button 
+                onClick={() => setValidationResult(null)} 
+                className="bg-primary hover:bg-primary/90"
+              >
+                Validate Another Idea
+              </Button>
+            </div>
           </div>
         </Card>
       </div>
