@@ -43,7 +43,7 @@ const IdeaValidatorForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.appIdea.trim()) {
       toast({
         title: "App idea is required",
@@ -61,42 +61,51 @@ const IdeaValidatorForm = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          appIdea: formData.appIdea,
-          problemItSolves: formData.problemItSolves,
-          targetAudience: formData.targetAudience,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
         const data = await response.json();
         console.log('Response data:', data);
-        
-        // Parse the output if it exists
+
         if (data.output) {
-          console.log('Raw output:', data.output);
           try {
             const outputText = data.output.replace(/```json\n|\n```/g, '');
-            console.log('Cleaned output text:', outputText);
             const rawResult = JSON.parse(outputText);
 
-// Remove numeric prefixes from keys
+            // Normalize "Existing Alternatives" to always be an array
+            const existingAlternativesRaw = rawResult["3. Existing Alternatives"];
+            const existingAlternatives = Array.isArray(existingAlternativesRaw)
+              ? existingAlternativesRaw
+              : typeof existingAlternativesRaw === "string"
+                ? [existingAlternativesRaw]
+                : [];
+
             const parsedResult: ValidationResult = {
-            "Target Market": rawResult["Target Market"] ?? rawResult["1. Target Market"] ?? "",
-            "Realness of the Problem": rawResult["Realness of the Problem"] ?? rawResult["2. Realness of the Problem"] ?? 0,
-            "Existing Alternatives": rawResult["Existing Alternatives"] ?? rawResult["3. Existing Alternatives"] ?? [],
-            "What's Unique?": rawResult["What's Unique?"] ?? rawResult["4. What’s Unique?"] ?? "",
-            "Feasibility for a college team": rawResult["Feasibility for a college team"] ?? rawResult["5. Feasibility for a college team"] ?? "",
-            "Potential Success Score": rawResult["Potential Success Score"] ?? rawResult["6. Potential Success Score"] ?? 0,
-            "AI Verdict": rawResult["AI Verdict"] ?? rawResult["7. AI Verdict"] ?? "",
-            "One actionable suggestion to improve it": rawResult["One actionable suggestion to improve it"] ?? rawResult["8. One actionable suggestion to improve it"] ?? ""
-          };
+              "Target Market": rawResult["1. Target Market"] ?? "",
+              "Realness of the Problem": rawResult["2. Realness of the Problem"] ?? 0,
+              "Existing Alternatives": existingAlternatives,
+              "What's Unique?": rawResult["4. What’s Unique?"] ?? "",
+              "Feasibility for a college team": rawResult["5. Feasibility for a college team"] ?? "",
+              "Potential Success Score": rawResult["6. Potential Success Score"] ?? 0,
+              "AI Verdict": rawResult["7. AI Verdict"] ?? "Rethink",
+              "One actionable suggestion to improve it": rawResult["8. One actionable suggestion to improve it"] ?? "",
+            };
 
+            setValidationResult(parsedResult);
 
-              setValidationResult(parsedResult);
+            toast({
+              title: "Success!",
+              description: "Your idea has been analyzed.",
+            });
 
+            setFormData({
+              appIdea: "",
+              problemItSolves: "",
+              targetAudience: "",
+            });
           } catch (parseError) {
-            console.error('Error parsing output:', parseError);
+            console.error("Error parsing output:", parseError);
             toast({
               title: "Parsing Error",
               description: "Could not parse the validation results.",
@@ -104,27 +113,14 @@ const IdeaValidatorForm = () => {
             });
           }
         } else {
-          console.log('No output field in response');
           toast({
             title: "No Results",
             description: "The validation completed but no results were returned.",
             variant: "destructive",
           });
         }
-        
-        toast({
-          title: "Success!",
-          description: "Your idea has been analyzed.",
-        });
-        
-        // Reset form after successful submission
-        setFormData({
-          appIdea: "",
-          problemItSolves: "",
-          targetAudience: "",
-        });
       } else {
-        throw new Error('Submission failed');
+        throw new Error("Submission failed");
       }
     } catch (error) {
       toast({
@@ -196,7 +192,7 @@ const IdeaValidatorForm = () => {
               <p className="text-muted-foreground text-sm">{validationResult["One actionable suggestion to improve it"]}</p>
             </Card>
 
-            {validationResult["Existing Alternatives"] && validationResult["Existing Alternatives"].length > 0 && (
+            {validationResult["Existing Alternatives"]?.length > 0 && (
               <Card className="p-6 bg-background/50 border-border/30">
                 <h3 className="text-lg font-semibold text-foreground mb-3">Existing Alternatives</h3>
                 <ul className="space-y-2">
@@ -245,8 +241,7 @@ const IdeaValidatorForm = () => {
                 type="text"
                 placeholder="Describe your app idea..."
                 value={formData.appIdea}
-                onChange={handleInputChange('appIdea')}
-                className="bg-input/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary"
+                onChange={handleInputChange("appIdea")}
                 required
               />
             </div>
@@ -260,8 +255,7 @@ const IdeaValidatorForm = () => {
                 type="text"
                 placeholder="What problem does your app solve?"
                 value={formData.problemItSolves}
-                onChange={handleInputChange('problemItSolves')}
-                className="bg-input/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary"
+                onChange={handleInputChange("problemItSolves")}
               />
             </div>
 
@@ -274,15 +268,14 @@ const IdeaValidatorForm = () => {
                 type="text"
                 placeholder="Who is your target audience?"
                 value={formData.targetAudience}
-                onChange={handleInputChange('targetAudience')}
-                className="bg-input/50 border-border/50 text-foreground placeholder:text-muted-foreground focus:ring-primary focus:border-primary"
+                onChange={handleInputChange("targetAudience")}
               />
             </div>
 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3 transition-all duration-200 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-3"
             >
               {isSubmitting ? "Submitting..." : "Validate My Idea"}
             </Button>
