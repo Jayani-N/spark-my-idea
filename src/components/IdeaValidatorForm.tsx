@@ -42,96 +42,100 @@ const IdeaValidatorForm = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.appIdea.trim()) {
+  if (!formData.appIdea.trim()) {
+    toast({
+      title: "App idea is required",
+      description: "Please enter your app idea before submitting.",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    const response = await fetch('https://automation8080.app.n8n.cloud/webhook-test/validator', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) throw new Error("Submission failed");
+
+    const data = await response.json();
+    console.log("Raw data received:", data);
+
+    if (!data.output) {
       toast({
-        title: "App idea is required",
-        description: "Please enter your app idea before submitting.",
+        title: "No Results",
+        description: "The validation completed but no results were returned.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsSubmitting(true);
+    const outputText = data.output.replace(/```json\n?|\n?```/g, '');
+    const rawResultOriginal = JSON.parse(outputText);
 
-    try {
-      const response = await fetch('https://automation8080.app.n8n.cloud/webhook-test/validator', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Response data:', data);
-
-        if (data.output) {
-          try {
-            const outputText = data.output.replace(/```json\n|\n```/g, '');
-            const rawResult = JSON.parse(outputText);
-
-            // Normalize "Existing Alternatives" to always be an array
-            const existingAlternativesRaw = rawResult["3. Existing Alternatives"];
-            const existingAlternatives = Array.isArray(existingAlternativesRaw)
-              ? existingAlternativesRaw
-              : typeof existingAlternativesRaw === "string"
-                ? [existingAlternativesRaw]
-                : [];
-
-            const parsedResult: ValidationResult = {
-              "Target Market": rawResult["1. Target Market"] ?? "",
-              "Realness of the Problem": rawResult["2. Realness of the Problem"] ?? 0,
-              "Existing Alternatives": existingAlternatives,
-              "What's Unique?": rawResult["4. What’s Unique?"] ?? "",
-              "Feasibility for a college team": rawResult["5. Feasibility for a college team"] ?? "",
-              "Potential Success Score": rawResult["6. Potential Success Score"] ?? 0,
-              "AI Verdict": rawResult["7. AI Verdict"] ?? "Rethink",
-              "One actionable suggestion to improve it": rawResult["8. One actionable suggestion to improve it"] ?? "",
-            };
-
-            setValidationResult(parsedResult);
-
-            toast({
-              title: "Success!",
-              description: "Your idea has been analyzed.",
-            });
-
-            setFormData({
-              appIdea: "",
-              problemItSolves: "",
-              targetAudience: "",
-            });
-          } catch (parseError) {
-            console.error("Error parsing output:", parseError);
-            toast({
-              title: "Parsing Error",
-              description: "Could not parse the validation results.",
-              variant: "destructive",
-            });
-          }
-        } else {
-          toast({
-            title: "No Results",
-            description: "The validation completed but no results were returned.",
-            variant: "destructive",
-          });
-        }
-      } else {
-        throw new Error("Submission failed");
+    // Normalize key names
+    const normalizeKeys = (obj: Record<string, any>) => {
+      const result: Record<string, any> = {};
+      for (const key in obj) {
+        const cleanedKey = key
+          .replace(/^\d+\.\s*/, "")           // Remove "1. " style prefixes
+          .replace(/\s*\(.*?\)/g, "")         // Remove anything in parentheses
+          .trim();
+        result[cleanedKey] = obj[key];
       }
-    } catch (error) {
-      toast({
-        title: "Submission failed",
-        description: "There was an error submitting your idea. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      return result;
+    };
+
+    const rawResult = normalizeKeys(rawResultOriginal);
+
+    // Normalize Existing Alternatives
+    const existingAlternativesRaw = rawResult["Existing Alternatives"];
+    const existingAlternatives = Array.isArray(existingAlternativesRaw)
+      ? existingAlternativesRaw
+      : typeof existingAlternativesRaw === "string"
+        ? [existingAlternativesRaw]
+        : [];
+
+    const parsedResult: ValidationResult = {
+      "Target Market": rawResult["Target Market"] ?? "",
+      "Realness of the Problem": Number(rawResult["Realness of the Problem"] ?? 0),
+      "Existing Alternatives": existingAlternatives,
+      "What's Unique?": rawResult["What’s Unique?"] ?? rawResult["What's Unique?"] ?? "",
+      "Feasibility for a college team": rawResult["Feasibility for a college team"] ?? "",
+      "Potential Success Score": Number(rawResult["Potential Success Score"] ?? 0),
+      "AI Verdict": rawResult["AI Verdict"] ?? "Rethink",
+      "One actionable suggestion to improve it": rawResult["One actionable suggestion to improve it"] ?? "",
+    };
+
+    setValidationResult(parsedResult);
+    toast({ title: "Success!", description: "Your idea has been analyzed." });
+
+    setFormData({
+      appIdea: "",
+      problemItSolves: "",
+      targetAudience: "",
+    });
+
+  } catch (error) {
+    console.error("Validation error:", error);
+    toast({
+      title: "Submission failed",
+      description: "There was an error submitting your idea. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   if (validationResult) {
     return (
