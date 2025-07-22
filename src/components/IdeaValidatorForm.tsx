@@ -12,14 +12,14 @@ interface FormData {
 }
 
 interface ValidationResult {
-  "Target Market": string;
-  "Realness of the Problem": number;
-  "Existing Alternatives": string[];
-  "What's Unique?": string;
-  "Feasibility for a college team": string;
-  "Potential Success Score": number;
-  "AI Verdict": string;
-  "One actionable suggestion to improve it": string;
+  "1. Target Market": string;
+  "2. Realness of the Problem": number;
+  "3. Existing Alternatives": string[];
+  "4. What's Unique?": string;
+  "5. Feasibility for a college team": string;
+  "6. Potential Success Score": number;
+  "7. AI Verdict": string;
+  "8. One actionable suggestion to improve it": string;
 }
 
 const IdeaValidatorForm = () => {
