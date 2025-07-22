@@ -82,15 +82,16 @@ const IdeaValidatorForm = () => {
 
 // Remove numeric prefixes from keys
             const parsedResult: ValidationResult = {
-              "Target Market": rawResult["1. Target Market"],
-              "Realness of the Problem": rawResult["2. Realness of the Problem"],
-              "Existing Alternatives": rawResult["3. Existing Alternatives"],
-              "What's Unique?": rawResult["4. What’s Unique?"],
-              "Feasibility for a college team": rawResult["5. Feasibility for a college team"],
-              "Potential Success Score": rawResult["6. Potential Success Score"],
-              "AI Verdict": rawResult["7. AI Verdict"],
-              "One actionable suggestion to improve it": rawResult["8. One actionable suggestion to improve it"]
-            };
+            "Target Market": rawResult["Target Market"] ?? rawResult["1. Target Market"] ?? "",
+            "Realness of the Problem": rawResult["Realness of the Problem"] ?? rawResult["2. Realness of the Problem"] ?? 0,
+            "Existing Alternatives": rawResult["Existing Alternatives"] ?? rawResult["3. Existing Alternatives"] ?? [],
+            "What's Unique?": rawResult["What's Unique?"] ?? rawResult["4. What’s Unique?"] ?? "",
+            "Feasibility for a college team": rawResult["Feasibility for a college team"] ?? rawResult["5. Feasibility for a college team"] ?? "",
+            "Potential Success Score": rawResult["Potential Success Score"] ?? rawResult["6. Potential Success Score"] ?? 0,
+            "AI Verdict": rawResult["AI Verdict"] ?? rawResult["7. AI Verdict"] ?? "",
+            "One actionable suggestion to improve it": rawResult["One actionable suggestion to improve it"] ?? rawResult["8. One actionable suggestion to improve it"] ?? ""
+          };
+
 
               setValidationResult(parsedResult);
 
