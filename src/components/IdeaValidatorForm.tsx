@@ -70,16 +70,32 @@ const IdeaValidatorForm = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Response data:', data);
         
         // Parse the output if it exists
         if (data.output) {
+          console.log('Raw output:', data.output);
           try {
             const outputText = data.output.replace(/```json\n|\n```/g, '');
+            console.log('Cleaned output text:', outputText);
             const parsedResult = JSON.parse(outputText);
+            console.log('Parsed result:', parsedResult);
             setValidationResult(parsedResult);
           } catch (parseError) {
             console.error('Error parsing output:', parseError);
+            toast({
+              title: "Parsing Error",
+              description: "Could not parse the validation results.",
+              variant: "destructive",
+            });
           }
+        } else {
+          console.log('No output field in response');
+          toast({
+            title: "No Results",
+            description: "The validation completed but no results were returned.",
+            variant: "destructive",
+          });
         }
         
         toast({
