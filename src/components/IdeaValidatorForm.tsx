@@ -56,7 +56,7 @@ const IdeaValidatorForm = () => {
   setIsSubmitting(true);
 
   try {
-    const response = await fetch('http://localhost:5678/webhook-test/validator', {
+    const response = await fetch('https://automation8080.app.n8n.cloud/webhook-test/validator', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
