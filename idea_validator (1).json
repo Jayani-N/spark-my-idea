@@ -1,0 +1,199 @@
+{
+  "name": "idea_validator",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "validator",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a5969145-1141-4bf5-a2a8-4ee32a24ca45",
+      "name": "Webhook",
+      "webhookId": "261bc2e4-c9b0-45eb-8e11-71ad526f4265"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a startup mentor and evaluator. A student has the following idea:\n{{ $json.body.appIdea }}\n{{ $json.body.problemItSolves }}\n{{ $json.body.targetAudience }}\n\nEvaluate the idea and respond with:\n\n1. Target Market  \n2. Realness of the Problem (1-10)  \n3. Existing Alternatives  \n4. What’s Unique?  \n5. Feasibility for a college team  \n6. Potential Success Score (1-10)  \n7. AI Verdict: Pursue / Refine / Rethink  \n8. One actionable suggestion to improve it\n\nRespond in JSON format.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f2c41358-4b50-4dc0-b921-9dd66b09b2c8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "1bd9e679-4d5d-4874-affe-5d40e38b554f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "qj4EkmtYLg9LnYo6",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        544,
+        240
+      ],
+      "id": "0d7c9629-723c-45da-8e9e-de5a39c66605",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "cCwRVoi1CWGChR52",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        560,
+        19.176726096868492
+      ],
+      "id": "bf657e82-d63b-4fc0-a50a-71f8384a3fef",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "gets the form data from the frontend."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "876a5f7a-d34a-4cd1-bb61-3262cc807587",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "fetches and renders the output back to the frontend."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -64
+      ],
+      "typeVersion": 1,
+      "id": "2a43af2c-86d1-4350-9981-8997a2641bcf",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "used for web search\n effectively."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "96b899bc-833f-4092-ba24-8cabdcda4c7e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Ai model for generating responses."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        208
+      ],
+      "typeVersion": 1,
+      "id": "c77c1f27-b24b-4134-b620-b3e984446196",
+      "name": "Sticky Note3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b7d42f2a-93c9-4712-b159-29805a6d7d1b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "76cdbd9207e50e7ea01dd79f0caad5127d81e3f487b5f548777f0a687f6b3b3e"
+  },
+  "id": "gIiVdIPXCsreGgKp",
+  "tags": []
+}
